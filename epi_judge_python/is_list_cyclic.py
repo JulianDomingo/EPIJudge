@@ -6,57 +6,81 @@ from test_framework.test_utils import enable_executor_hook
 
 
 def has_cycle(head):
-    # TODO - you fill in here.
-    return None
+	# The tortoise and hare will ALWAYS meet at the first node in the cycle.
+	# The pointers travel as a ratio: when the hare loops through the cycle
+	# twice, the tortoise looped through the cycle exactly once. You can also
+	# find the length of the cycle by subsequently traversing the tortoise and
+	# keeping track of counter until the tortoise meets the hare again.
+	if not head:
+		return None
+
+	tortoise = hare = head
+
+	if not hare.next or not hare.next.next or not tortoise.next:
+		return None
+
+	while tortoise and hare:
+		tortoise = tortoise.next
+		hare = hare.next.next
+
+		if tortoise is hare:
+			return tortoise
+
+		if not tortoise.next or not hare.next or not hare.next.next:
+			break
+
+
+
+	return None
 
 
 @enable_executor_hook
 def has_cycle_wrapper(executor, head, cycle_idx):
-    cycle_length = 0
-    if cycle_idx != -1:
-        if head is None:
-            raise RuntimeError("Can't cycle empty list")
-        cycle_start = None
-        cursor = head
-        while cursor.next is not None:
-            if cursor.data == cycle_idx:
-                cycle_start = cursor
-            cursor = cursor.next
-            cycle_length += 1 if cycle_start is not None else 0
+	cycle_length = 0
+	if cycle_idx != -1:
+		if head is None:
+			raise RuntimeError("Can't cycle empty list")
+		cycle_start = None
+		cursor = head
+		while cursor.next is not None:
+			if cursor.data == cycle_idx:
+				cycle_start = cursor
+			cursor = cursor.next
+			cycle_length += 1 if cycle_start is not None else 0
 
-        if cursor.data == cycle_idx:
-            cycle_start = cursor
-        if cycle_start is None:
-            raise RuntimeError("Can't find a cycle start")
-        cursor.next = cycle_start
-        cycle_length += 1
+		if cursor.data == cycle_idx:
+			cycle_start = cursor
+		if cycle_start is None:
+			raise RuntimeError("Can't find a cycle start")
+		cursor.next = cycle_start
+		cycle_length += 1
 
-    result = executor.run(functools.partial(has_cycle, head))
+	result = executor.run(functools.partial(has_cycle, head))
 
-    if cycle_idx == -1:
-        if result is not None:
-            raise TestFailure("Found a non-existing cycle")
-    else:
-        if result is None:
-            raise TestFailure("Existing cycle was not found")
-        cursor = result
-        while True:
-            cursor = cursor.next
-            cycle_length -= 1
-            if cursor is None or cycle_length < 0:
-                raise TestFailure(
-                    "Returned node does not belong to the cycle or is not the closest node to the head"
-                )
-            if cursor is result:
-                break
+	if cycle_idx == -1:
+		if result is not None:
+			raise TestFailure("Found a non-existing cycle")
+	else:
+		if result is None:
+			raise TestFailure("Existing cycle was not found")
+		cursor = result
+		while True:
+			cursor = cursor.next
+			cycle_length -= 1
+			if cursor is None or cycle_length < 0:
+				raise TestFailure(
+					"Returned node does not belong to the cycle or is not the closest node to the head"
+				)
+			if cursor is result:
+				break
 
-    if cycle_length != 0:
-        raise TestFailure(
-            "Returned node does not belong to the cycle or is not the closest node to the head"
-        )
+	if cycle_length != 0:
+		raise TestFailure(
+			"Returned node does not belong to the cycle or is not the closest node to the head"
+		)
 
 
 if __name__ == '__main__':
-    exit(
-        generic_test.generic_test_main(
-            "is_list_cyclic.py", 'is_list_cyclic.tsv', has_cycle_wrapper))
+	exit(
+		generic_test.generic_test_main(
+			"is_list_cyclic.py", 'is_list_cyclic.tsv', has_cycle_wrapper))
