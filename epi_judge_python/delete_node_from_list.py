@@ -6,27 +6,30 @@ from test_framework.test_utils import enable_executor_hook
 
 # Assumes node_to_delete is not tail.
 def deletion_from_list(node_to_delete):
-    # TODO - you fill in here.
-    return
+	# This is a singly linked list
+	# Copy successor's value to current node and delete successor node instead
+	node_to_delete.data = node_to_delete.next.data
+	node_to_delete.next = node_to_delete.next.next
+	return
 
 
 @enable_executor_hook
 def deletion_from_list_wrapper(executor, head, node_to_delete_idx):
-    node_to_delete = head
-    if node_to_delete is None:
-        raise RuntimeError('List is empty')
-    for _ in range(node_to_delete_idx):
-        if node_to_delete.next is None:
-            raise RuntimeError("Can't delete last node")
-        node_to_delete = node_to_delete.next
+	node_to_delete = head
+	if node_to_delete is None:
+		raise RuntimeError('List is empty')
+	for _ in range(node_to_delete_idx):
+		if node_to_delete.next is None:
+			raise RuntimeError("Can't delete last node")
+		node_to_delete = node_to_delete.next
 
-    executor.run(functools.partial(deletion_from_list, node_to_delete))
+	executor.run(functools.partial(deletion_from_list, node_to_delete))
 
-    return head
+	return head
 
 
 if __name__ == '__main__':
-    exit(
-        generic_test.generic_test_main("delete_node_from_list.py",
-                                       'delete_node_from_list.tsv',
-                                       deletion_from_list_wrapper))
+	exit(
+		generic_test.generic_test_main("delete_node_from_list.py",
+									   'delete_node_from_list.tsv',
+									   deletion_from_list_wrapper))
