@@ -4,6 +4,12 @@ from test_framework import generic_test
 class Queue:
 	# Using stacks, one holds all elements enqueued. When we dequeue, we must
 	# pop everything from the stack and place it in a temp stack.
+	#
+	# The primary problem with this approach is there is no point in placing
+	# the elements from temp stack BACK to elems stack, as every subsequent
+	# dequeue after the first is trivial if popped from the temp stack (until
+	# the temp stack is empty)
+	#
 	def __init__(self):
 		self.elems = []
 		self.temp = []
@@ -14,19 +20,16 @@ class Queue:
 
 
 	def dequeue(self):
-		if not self.elems:
+		if not len(self.elems) and not len(self.temp):
 			raise IndexError('Queue is empty!')
 
-		while len(self.elems):
-			self.temp.append(self.elems.pop())
+		if not len(self.temp):
+			# No existing elements in temp, push them to temp so subsequent
+			# dequeues can take O(1) time
+			while len(self.elems):
+				self.temp.append(self.elems.pop())
 
-		to_ret = self.temp.pop()
-
-		# Place back to elems
-		while len(self.temp):
-			self.elems.append(self.temp.pop())
-
-		return to_ret
+		return self.temp.pop()
 
 
 def queue_tester(ops):
