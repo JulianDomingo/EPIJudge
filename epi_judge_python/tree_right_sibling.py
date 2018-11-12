@@ -18,9 +18,26 @@ def is_leaf(node):
 
 
 def construct_right_sibling(tree):
-	if not tree:
-		return
+	# O(N) time, O(1) space! Takes advantage of perfect binary tree structure.
+	def helper(start_node):
+		while start_node and start_node.left:
+			start_node.left.next = start_node.right
 
+			if not start_node.next:
+				break
+
+			# Keep going until you hit the rightmost node in layer
+			start_node.right.next = start_node.next.left
+			start_node = start_node.next
+
+
+	while tree and tree.left:
+		helper(tree)
+		tree = tree.left
+
+	return
+
+	# O(N) time / space using BFS
 	# There are precisely 2^height total nodes in each layer, where layer of
 	# root is 0. If we perform a BFS on the perfect binary tree, we know
 	# precisely the number of nodes each layer will have, so we pop a total of
@@ -28,33 +45,33 @@ def construct_right_sibling(tree):
 	# .next fields to be the subsequent node in the popped list. We then add
 	# all the previous layer's children to the queue and repeat the process
 	# until the leaf layer is reached.
-	num_nodes_in_layer = 1
+	# num_nodes_in_layer = 1
 
-	q = deque()
-	q.append(tree)
+	# q = deque()
+	# q.append(tree)
 
-	while len(q):
-		layer_nodes = []
+	# while len(q):
+		# layer_nodes = []
 
-		# Obtain all nodes in current layer
-		for _ in range(num_nodes_in_layer):
-			layer_nodes.append(q.popleft())
+		# # Obtain all nodes in current layer
+		# for _ in range(num_nodes_in_layer):
+			# layer_nodes.append(q.popleft())
 
-		# Set next fields
-		for i in range(len(layer_nodes) - 1):
-			layer_nodes[i].next = layer_nodes[i + 1]
+		# # Set next fields
+		# for i in range(len(layer_nodes) - 1):
+			# layer_nodes[i].next = layer_nodes[i + 1]
 
-		# Don't add if current layer is leaf layer
-		if is_leaf(layer_nodes[0]):
-			break
+		# # Don't add if current layer is leaf layer
+		# if is_leaf(layer_nodes[0]):
+			# break
 
-		# Add current layer's child nodes
-		for node in layer_nodes:
-			q.append(node.left)
-			q.append(node.right)
+		# # Add current layer's child nodes
+		# for node in layer_nodes:
+			# q.append(node.left)
+			# q.append(node.right)
 
-		# Update layer size
-		num_nodes_in_layer <<= 1
+		# # Update layer size
+		# num_nodes_in_layer <<= 1
 
 	return
 
