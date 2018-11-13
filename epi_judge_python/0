@@ -7,11 +7,8 @@ MinMax = collections.namedtuple('MinMax', ('smallest', 'largest'))
 
 
 def find_min_max(A):
-	if len(A) <= 1:
-		return MinMax(A[0], A[0])
-
 	# 3n/2 - 1
-	cur_min, cur_max = (A[0], A[1]) if (A[0] < A[1]) else (A[1], A[0])
+	cur_min, cur_max = A[0], A[1]
 
 	for i in range(2, len(A) - 1, 2):
 		elem1, elem2 = A[i], A[i + 1]
