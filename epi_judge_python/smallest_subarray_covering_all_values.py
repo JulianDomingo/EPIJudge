@@ -7,6 +7,16 @@ from test_framework.test_utils import enable_executor_hook
 Subarray = collections.namedtuple('Subarray', ('start', 'end'))
 
 def find_smallest_sequentially_covering_subset(paragraph, keywords):
+	# Variant: Solve this with constraint that order in which the words appear
+	# in 'keywords' must be maintained.
+	# i.e. - ["Union", "save"] => ["Union, and is not either to save"] returns (0, 6)
+	#		 ["save", "Union"] => returns None
+	# NOTE: Assume all words in keywords are DISTINCT
+
+
+
+
+
 	# Caveat: This stores the entire paragraph in memory. To optimize memory,
 	# use a DLL that stores the latest index of any keyword in the keywords set.
 	# When we find a closer index of a word in keywords, we push the DLL node
