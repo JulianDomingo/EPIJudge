@@ -1,6 +1,5 @@
 import collections
 import functools
-import sys
 
 from test_framework import generic_test
 from test_framework.test_utils import enable_executor_hook
@@ -8,37 +7,29 @@ from test_framework.test_utils import enable_executor_hook
 Subarray = collections.namedtuple('Subarray', ('start', 'end'))
 
 def find_smallest_sequentially_covering_subset(paragraph, keywords):
-	result = Subarray(-1, -1)
-	smallest = sys.maxsize
-	res_s = res_e = 0
-	left = 0
-	tally = len(keywords)
-	keywords_set = set(keywords)
-
-	# Use counter object as threshold. Once tally is empty, record
-	# result and start incrementing start pointer until no longer containing
-	# words in keywords
+	res = Subarray(0, 0)
 	kw_counter = collections.Counter(keywords)
+	l, tally = 0, len(keywords)
 
-	for right, word in enumerate(paragraph):
-		if word in kw_counter:
-			kw_counter[word] -= 1
-			if kw_counter[word] >= 0:
-				# Only decrement tally for TOTAL occurrences in keywords.
+	for r, text in enumerate(paragraph):
+		if text in kw_counter:
+			kw_counter[text] -= 1
+			if kw_counter[text] >= 0:
+				# Account for occurrences only up to the frequency found in keywords
 				tally -= 1
 
-		while not tally:
-			if result == (-1, -1) or right - left < result[1] - result[0]:
-				result = (left, right)
+		while tally == 0:
+			if res == (0, 0) or res[1] - res[0] > r - l:
+				res = (l, r)
 
-			if paragraph[left] in kw_counter:
-				kw_counter[paragraph[left]] += 1
-				if kw_counter[paragraph[left]] > 0:
+			if paragraph[l] in kw_counter:
+				kw_counter[paragraph[l]] += 1
+				if kw_counter[paragraph[l]] > 0:
 					tally += 1
 
-			left += 1
+			l += 1
 
-	return result
+	return res
 
 
 @enable_executor_hook
