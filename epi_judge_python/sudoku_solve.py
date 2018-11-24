@@ -1,3 +1,4 @@
+import itertools
 import copy
 import functools
 import math
@@ -8,33 +9,61 @@ from test_framework.test_utils import enable_executor_hook
 
 
 def solve_sudoku(partial_assignment):
-	def has_duplicate(block):
-		vals = list(filter(lambda x: x != 0, block))
-		return len(vals) != len(set(vals))
+	# Test 1-9 inclusive for an uninitialized cell. If placement is valid,
+	# recurse to next cell. Otherwise, try the other 8 numbers
+	n = len(partial_assignment)
+	solved = False
 
-	m = len(partial_assignment)
-	n = len(partial_assignment[0])
+	def solver(row, col):
+		if row == n:
+			# Go to next column
+			row, col = 0, col + 1
+			if col == n:
+				# Reached last square, since we know we're given a valid board, can
+				# simply stop here.
+				return True
 
-	# Check for duplicates in rows and columns
-	if any(
-		has_duplicate([partial_assignment[row][col] for col in range(n)]) or
-		has_duplicate([partial_assignment[col][row] for col in range(n)])
-		for row in range(n)
-	):
+		# Skip uninitialized cells
+		if not partial_assignment[row][col]:
+			return solver(row + 1, col)
+
+		# Checks whether placement of a number is valid.
+		def is_valid(row, col, val):
+			# Check row duplicates
+			if any(val == partial_assignment[idx][col]
+					for idx in range(n)):
+				return False
+
+			# Check col duplicates
+			if any(val == partial_assignment[row][idx]
+					for idx in range(n)):
+				return False
+
+			# Check current subgrid - only need to check current since we are
+			# given a valid partially complete sudoku
+			subgrid_size = int(math.sqrt(n))
+			row_subgrid_ofs = row // subgrid_size
+			col_subgrid_ofs = col // subgrid_size
+
+			return not any(
+				val ==
+				partial_assignment[subgrid_size * row_subgrid_ofs + a]\
+									[subgrid_size * col_subgrid_ofs + b]
+				for a, b in itertools.product(range(subgrid_size), repeat=2)
+			)
+
+
+		for num in range(1, n + 1):
+			if is_valid(row, col, num):
+				partial_assignment[row][col] = num
+				if solver(row + 1, col):
+					return True
+
+		# Undo assignment
+		partial_assignment[row][col] = 0
 		return False
 
-	# Check for duplicates in 3x3 subgrids
-	subgrid_size = int(math.sqrt(n))
-
-	return all(
-		not has_duplicate([
-			partial_assignment[row][col]
-			for row in range(subgrid_size * i, subgrid_size * (i + 1))
-			for col in range(subgrid_size + j, subgrid_size * (j + 1))
-		])
-		for i in range(m)
-		for j in range(n)
-	)
+	return solver(0, 0)
 
 
 def assert_unique_seq(seq):
